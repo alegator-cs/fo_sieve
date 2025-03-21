@@ -74,6 +74,7 @@ def fo_sieve(prime_triple, initial_prime_count, num_primes_to_predict):
     plt.legend()
     plt.show()
 
+    last_prime = known_primes[-1]
     predicted_primes = []
     current_index = len(known_primes)
 
@@ -87,24 +88,33 @@ def fo_sieve(prime_triple, initial_prime_count, num_primes_to_predict):
             composites, indices = generate_composites(prime_triple, len(composites) + 1, composites, indices)
 
         candidate = composites.index(nearest_composite) + 1
+        if (candidate > last_prime and confirm_prime(candidate)):
+            predicted_primes.append(candidate)
+            last_prime = candidate
+            current_index += 1
+            continue
 
         confirmed = False
-        delta = 0
+        done_left = False  
+        print(f"candidate: {candidate}, last_prime: {last_prime}")
+        delta = 1
         while not confirmed:
-            prime_candidate1 = confirm_prime(candidate + delta)
-            if prime_candidate1:
+            left_candidate = candidate - delta
+            right_candidate = candidate + delta if candidate + delta > last_prime else last_prime + delta
+            done_left = (left_candidate <= last_prime)
+            if (not done_left):
+                print(f"left_candidate: {left_candidate}", end = ", ")
+            print(f"right_candidate: {right_candidate}")
+            if (not done_left and confirm_prime(left_candidate)):
                 confirmed = True
-                predicted_primes.append(prime_candidate1)
-                print(f"Confirmed prime at index {current_index}: {prime_candidate1}")
-            else:
-                print(f"Rejected candidate at index {current_index}: {candidate}")
-            prime_candidate2 = confirm_prime(candidate - delta)
-            if prime_candidate2:
+                predicted_primes.append(left_candidate)
+                last_prime = left_candidate
+                print(f"Confirmed prime at index {current_index}: {left_candidate}")
+            if (not confirmed and confirm_prime(right_candidate)):
                 confirmed = True
-                predicted_primes.append(prime_candidate2)
-                print(f"Confirmed prime at index {current_index}: {prime_candidate2}")
-            else:
-                print(f"Rejected candidate at index {current_index}: {candidate}")
+                predicted_primes.append(right_candidate)
+                last_prime = right_candidate
+                print(f"Confirmed prime at index {current_index}: {right_candidate}")
             delta += 1
 
         current_index += 1
